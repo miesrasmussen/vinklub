@@ -1285,6 +1285,25 @@
         // Initialize calendar on load
         renderCalendar();
         
+        // Initialize file input listener when DOM is ready
+        window.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            document.getElementById('previewImage').src = e.target.result;
+                            document.getElementById('winePreview').style.display = 'block';
+                            analyzeWine(e.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+        
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('eventModal');
