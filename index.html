@@ -631,7 +631,175 @@
             color: #722f37;
             font-weight: 600;
         }
-    </style>
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 20px 0;
+                margin-bottom: 30px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            header p {
+                font-size: 1em;
+            }
+            
+            .nav-tabs {
+                gap: 5px;
+                padding: 5px;
+            }
+            
+            .tab-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            
+            /* Mobile Calendar */
+            .calendar {
+                padding: 15px;
+            }
+            
+            .calendar-header {
+                margin-bottom: 15px;
+                padding-bottom: 15px;
+            }
+            
+            .calendar-header h2 {
+                font-size: 1.3em;
+            }
+            
+            .calendar-nav button {
+                padding: 6px 12px;
+                font-size: 16px;
+            }
+            
+            .calendar-grid {
+                gap: 3px;
+            }
+            
+            .calendar-day-header {
+                font-size: 12px;
+                padding: 5px 2px;
+            }
+            
+            .calendar-day {
+                font-size: 14px;
+                border-radius: 3px;
+            }
+            
+            .calendar-day .participant-count {
+                font-size: 9px;
+                padding: 1px 3px;
+            }
+            
+            /* Mobile Scanner */
+            .scanner-section {
+                padding: 20px;
+            }
+            
+            .scanner-section h2 {
+                font-size: 1.5em;
+            }
+            
+            .wine-preview img {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            /* Mobile Wine Collection */
+            .wine-collection {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .wine-card {
+                padding: 15px;
+            }
+            
+            .wine-card img {
+                height: 150px;
+            }
+            
+            /* Mobile Modal */
+            .modal-content {
+                margin: 20px;
+                padding: 25px;
+                max-width: calc(100% - 40px);
+            }
+            
+            .modal-header h3 {
+                font-size: 1.4em;
+            }
+            
+            .participants-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .participant-checkbox {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            /* Mobile Rating */
+            .rating-section {
+                padding: 20px;
+            }
+            
+            .rating-section h3 {
+                font-size: 1.3em;
+                margin-bottom: 20px;
+            }
+            
+            .rating-item label {
+                font-size: 1em;
+            }
+            
+            .rating-slider {
+                height: 8px;
+            }
+            
+            .rating-slider::-webkit-slider-thumb {
+                width: 22px;
+                height: 22px;
+            }
+            
+            .rating-slider::-moz-range-thumb {
+                width: 22px;
+                height: 22px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .calendar-day {
+                font-size: 12px;
+            }
+            
+            .calendar-day-header {
+                font-size: 11px;
+                padding: 5px 0;
+            }
+            
+            #collection h2 {
+                font-size: 1.5em;
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Ensure rating is saved properly */
+        input[type="text"], input[type="time"] {
+            -webkit-appearance: none;
+            appearance: none;
+        }
 </head>
 <body>
     <div class="container">
@@ -1009,10 +1177,18 @@
         });
         
         function saveWine() {
-            if (!currentWineData) return;
+            if (!currentWineData) {
+                alert('Venligst upload et billede af vinen først');
+                return;
+            }
+            
+            // Get wine name from user
+            const wineName = prompt('Hvad hedder vinen?', `${currentWineData.type} ${currentWineData.year}`);
+            if (!wineName) return;
             
             const wine = {
                 ...currentWineData,
+                name: wineName,
                 ratings: {
                     aroma: parseInt(document.getElementById('aroma').value),
                     taste: parseInt(document.getElementById('taste').value),
@@ -1033,6 +1209,13 @@
             document.getElementById('winePreview').style.display = 'none';
             document.getElementById('wineInfo').style.display = 'none';
             document.getElementById('ratingSection').style.display = 'none';
+            
+            // Reset sliders
+            document.querySelectorAll('.rating-slider').forEach(slider => {
+                slider.value = 5;
+                document.getElementById(slider.id + 'Value').textContent = '5';
+            });
+            
             currentWineData = null;
         }
         
@@ -1049,8 +1232,9 @@
                 const card = document.createElement('div');
                 card.className = 'wine-card';
                 card.innerHTML = `
-                    <img src="${wine.image}" alt="Vin">
-                    <h3>${wine.type} - ${wine.year}</h3>
+                    <img src="${wine.image}" alt="${wine.name || 'Vin'}">
+                    <h3>${wine.name || wine.type} - ${wine.year}</h3>
+                    <p><strong>Type:</strong> ${wine.type}</p>
                     <p><strong>Region:</strong> ${wine.region}</p>
                     <p><strong>Druer:</strong> ${wine.grapes}</p>
                     <p><strong>Alkohol:</strong> ${wine.alcohol}</p>
@@ -1060,30 +1244,35 @@
                             <div class="rating-bar-fill">
                                 <div class="rating-bar-value" style="width: ${wine.ratings.aroma * 10}%"></div>
                             </div>
+                            <span style="margin-left: 5px; font-size: 12px;">${wine.ratings.aroma}/10</span>
                         </div>
                         <div class="rating-bar">
                             <label>Smag</label>
                             <div class="rating-bar-fill">
                                 <div class="rating-bar-value" style="width: ${wine.ratings.taste * 10}%"></div>
                             </div>
+                            <span style="margin-left: 5px; font-size: 12px;">${wine.ratings.taste}/10</span>
                         </div>
                         <div class="rating-bar">
                             <label>Fylde</label>
                             <div class="rating-bar-fill">
                                 <div class="rating-bar-value" style="width: ${wine.ratings.body * 10}%"></div>
                             </div>
+                            <span style="margin-left: 5px; font-size: 12px;">${wine.ratings.body}/10</span>
                         </div>
                         <div class="rating-bar">
                             <label>Eftersmag</label>
                             <div class="rating-bar-fill">
                                 <div class="rating-bar-value" style="width: ${wine.ratings.finish * 10}%"></div>
                             </div>
+                            <span style="margin-left: 5px; font-size: 12px;">${wine.ratings.finish}/10</span>
                         </div>
                         <div class="rating-bar">
                             <label>Samlet</label>
                             <div class="rating-bar-fill">
                                 <div class="rating-bar-value" style="width: ${wine.ratings.overall * 10}%"></div>
                             </div>
+                            <span style="margin-left: 5px; font-size: 12px;">${wine.ratings.overall}/10</span>
                         </div>
                     </div>
                 `;
